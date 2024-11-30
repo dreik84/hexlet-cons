@@ -140,10 +140,28 @@ var result = LambdaDemo.transform((input) -> input.toUpperCase(), "hello");
 
 Некоторые ситуации использования лямбда-функций настолько распространенные, что функциональные интерфейсы для них встроили прямо в Java. В большинстве случаев вы будете встречаться с ними не напрямую, а через код, в котором они уже задействованы. 
 
+--- Ссылки на методы (Method References) ---
 
+Ссылка на метод (Method Reference) – это сокращенная форма лямбда выражения для вызова методов. То есть это синтаксический сахар, который делает код короче и проще для чтения.
 
+langs.forEach((lang) -> System.out.println(lang));
+langs.forEach(System.out::println);
 
+Общий синтаксис ссылки на метод выглядит так:
 
+Name::methodName
+
+Где Name может быть как объектом так и классом, в зависимости от того, ссылку на что мы хотим получить и как это будет использовано потом. 
+
+objectName::methodName // (v) -> objectName.methodName(v)
+ClassName::staticMethodName // (v) -> ClassName.staticMethodName(v)
+ClassName::methodName // (v) -> v.methodName()
+
+Последний пример часто применяется с Comparator при сортировках:
+
+words.sort(Comparator.comparingInt(String::length));
+// Эквивалент
+// words.sort((w1, w2) -> Integer.compare(w1.length(), w2.length()));
 
 
 
