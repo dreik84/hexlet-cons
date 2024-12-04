@@ -96,6 +96,110 @@ Predicate<Integer> isGreaterThanFive = number -> number > 5;
 
 В случае лямбда-функций тип всегда указывается у переменной, поэтому здесь параметр типа передается в левой части выражения.
 
+---  Реализация дженериков ---
+
+Попрактикуемся в создании дженериков на примере такой коллекции как пара. Подобный тип данных встречается во многих языках и имитируется в Java с помощью мапы: Map.entry(key, value). Пара содержит два элемента, которые можно получить из пары и установить новые. 
+
+-- Один параметр типа --
+
+var point = new SimplePair<Integer>();
+
+Для простоты наша пара будет работать с одним параметром типа, который определяет тип обоих значений в паре. Напишем соответствующий класс:
+
+public class SimplePair<T> {
+
+    private T left;
+    private T right;
+
+    public T getLeft() {
+        return left;
+    }
+
+    public T getRight() {
+        return right;
+    }
+
+    public void setLeft(T left) {
+        this.left = left;
+    }
+
+    public void setRight(T right) {
+        this.right = right;
+    }
+}
+
+В угловых скобках указывается имя параметра, который будет передан внутрь при "вызове дженерика". Внутри этот параметр используется уже без скобок.
+
+Синтаксически в определении методов ничего не поменялось, кроме того, что вместо конкретного типа мы подставляем параметр типа T. В случае геттеров мы возвращаем данные этого типа, в случае сеттеров - получаем на вход.
+
+Теперь создадим дженерик-интерфейс, по аналогии с интерфейсом List.
+
+public interface Pair<T> {
+
+    public T getLeft();
+    public T getRight();
+
+    public void setLeft(T left);
+    public void setRight(T right);
+}
+И реализуем его.
+
+public class SimplePair<T> implements Pair<T> {
+    // тут реализация
+}
+
+Параметр типа указывается и для класса и для интерфейса. В остальном в классе ничего не меняется. Сделав такое изменение, мы получаем возможность подменять реализацию.
+
+-- Два параметра типа --
+
+Изменим нашу пару так, чтобы тип каждого параметра выбирался независимо. Пример использования.
+
+var pair = new SimplePair<String, Integer>();
+
+Сначала поправим интерфейс.
+
+public interface Pair<L, R> {
+
+    public L getLeft();
+    public R getRight();
+
+    public void setLeft(L left);
+    public void setRight(R right);
+}
+
+Следующий шаг поменять класс.
+
+public class SimplePair<L, R> implements Pair<L, R> {
+
+    private L left;
+    private R right;
+
+    // Добавляем конструктор по умолчанию
+    // чтобы оставить возможность создавать пустую пару
+    public SimplePair() {}
+    public SimplePair(L left, R right) {
+        this.left = left;
+        this.right = right;
+    }
+
+    public L getLeft() {
+        return left;
+    }
+
+    public R getRight() {
+        return right;
+    }
+
+    public void setLeft(L left) {
+        this.left = left;
+    }
+
+    public void setRight(R right) {
+        this.right = right;
+    }
+}
+
+И последнее, что мы сделаем, добавим конструктор, который позволяет передавать значения для пары в одну строку. Кроме того, в таком случае, компилятор автоматически выводит тип передаваемых значений, что позволяет не прописывать явно параметры типов.
 
 
 
