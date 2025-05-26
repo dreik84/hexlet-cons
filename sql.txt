@@ -363,6 +363,87 @@ SELECT id, first_name, last_name, email, birthday FROM users WHERE last_name NOT
 
 --- Регулярные выражения ---
 
+Язык SQL поддерживает работу с регулярными выражениями (regular expressions или RegEx). 
+Это специальный язык, позволяющий достаточно точно определить шаблоны поиска в строке.
+
+Для работы с регулярными выражениями используется оператор SIMILAR TO вместо LIKE.
+
+SELECT * FROM users WHERE first_name SIMILAR TO '[AB]%';
+SELECT * FROM users WHERE first_name SIMILAR TO '%[a-z]';
+SELECT * FROM users WHERE first_name SIMILAR TO ''%[а-я]%';
+SELECT * FROM users WHERE first_name SIMILAR TO '%[0-9]';
+SELECT * FROM users WHERE first_name SIMILAR TO '%@%.%';
+SELECT * FROM users WHERE first_name SIMILAR TO '%@%.__';
+SELECT * FROM users WHERE first_name SIMILAR TO '%.___';
+SELECT * FROM users WHERE first_name NOT SIMILAR TO '%@%.%';
+
+Cамые полезные и часто используемые спецсимволы:
+- Символ % соответствует любому количеству любых символов
+- Квадратные скобки [] используются для перечисления конкретных символов — например, [АЕИОУЭЮ]
+- Дефис - в квадратных скобках означает перечисление символов — например, [0-9] соответствует любой цифре
+- Подчеркивание _ означает ровно один любой символ (букву или цифру)
+
+--- Сложные условия фильтрации ---
+
+Оператора OR. Он переводится как «ИЛИ» и указывает, что выражение будет верным, если хотя бы одно условие выполняется.
+Оператор AND. Он переводится как «И» и указывает, что выражение будет верным, только если оба условия выполняются.
+
+-- Как объединять условия --
+
+SELECT *
+FROM courses
+WHERE body LIKE '%dolor%'
+    AND created_at < '2022-06-14';
+
+В этом запросе мы выбираем по двум условиям:
+- В описании встречается слово dolor
+- И при этом дата создания курса строго раньше 14 июня 2022 года
+
+SELECT *
+FROM users
+WHERE id > 90 OR id IS NULL;
+
+Логические операторы OR и AND можно комбинировать, однако нужно помнить об особенности — приоритет AND выше, чем OR.
+Чтобы не создавать неоднозначностей, в сложных условиях рекомендуем использовать круглые скобки. 
+
+SELECT *
+FROM users
+WHERE first_name = 'Andy'
+    OR (created_at > '2022-06-13' AND created_at < '2022-06-14');
+
+--- Фильтрация данных по диапазону ---
+
+Оператор BETWEEN — это сокращенная версия двух условий, соединенных через AND. 
+
+SELECT *
+FROM users
+WHERE birthday >= '2022-01-01' AND birthday <= '2022-02-01';
+
+Теперь запишем диапазон дат через BETWEEN:
+
+SELECT *
+FROM users
+WHERE birthday BETWEEN '2022-01-01' AND '2022-02-01';
+
+SELECT *
+FROM users
+WHERE birthday NOT BETWEEN '2022-01-01' AND '2022-02-01';
+
+Обычно оператор BETWEEN используют для дат, но его можно применять и с числами:
+
+SELECT
+  id,
+  first_name,
+  last_name,
+  email
+FROM users
+WHERE id BETWEEN 15 AND 23;
+
+Важно помнить, что BETWEEN включает в условие крайние значения из указанного диапазона.
+
+
+
+
 
 
 
