@@ -608,6 +608,66 @@ SELECT MIN(spent_minutes) FROM course_reviews;
 
 В качестве аргументов в функции MAX и MIN можно передавать поля числовых типов, а так же даты и строки. 
 
+--- Группировка по выборке ---
+
+Группировка данных позволяет объединить одинаковые значения в заданных полях в группы, а затем выполнять подсчеты для каждой группы.
+
+Для группировки данных существует специальный оператор GROUP BY
+
+SELECT
+    user_id,
+    COUNT(*)
+FROM course_members
+GROUP BY user_id
+ORDER BY user_id;
+
+-- Псевдонимы для столбцов --
+
+Чтобы присвоить столбцу псевдоним, нужно после его определения записать AS и указать желаемое имя.
+
+SELECT
+    user_id AS student,
+    COUNT(*) AS courses_count
+FROM course_members
+GROUP BY user_id
+ORDER BY user_id;
+
+-- Как работает GROUP BY --
+
+Важно помнить, что поля, которые вы будете выводить в запросе, нужно указывать в операторе GROUP BY или применять к ним агрегатную функцию.
+
+SELECT
+    user_id AS student,
+    COUNT(user_id) AS courses_count,
+    MAX(created_at) AS last_reg
+FROM course_members
+GROUP BY user_id
+ORDER BY user_id;
+
+--- Фильтрация c помощью оператора HAVING ---
+
+Иногда встречаются задачи, в которых требуется отфильтровать записи после группировки.
+В этой задаче понадобится дополнение к GROUP BY, которое называется HAVING. Именно его мы изучим в этом уроке.
+
+С помощью ключевого слова HAVING мы можем задать условия на строки выборки после группировки данных.
+
+SELECT
+    user_id,
+    SUM(spent_minutes)
+FROM course_reviews
+WHERE user_id <= 40
+GROUP BY user_id
+HAVING SUM(spent_minutes) < 30
+ORDER BY user_id;
+
+Условия в HAVING проверяются после группировки, поэтому они задаются после предложения GROUP BY. 
+В этом и состоит отличие от условий WHERE, которые применяются к строкам исходной таблицы до группировки.
+
+
+
+
+
+
 
 
 
