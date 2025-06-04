@@ -320,6 +320,122 @@ LEFT JOIN employees AS mngr ON
 В SELF JOIN запросах одна и та же таблица выполняет разные роли. Поэтому необходимо использовать псевдонимы для таблиц, чтобы явно разграничить эти роли.
 В нашем запросе используется LEFT JOIN, но это не принципиально. Другие виды соединений также поддерживают соединение таблицы с самой собой.
 
+--- Соединение трех и более таблиц ---
+
+SELECT
+    drv.driver_name AS driver, -- имя водителя
+    pas.passenger_name AS passenger, -- имя пассажира
+    rd.price AS ride_price -- стоимость поездки
+FROM rides AS rd
+INNER JOIN drivers AS drv
+    ON -- первое соединение
+        rd.driver_id = drv.driver_id
+INNER JOIN passengers AS pas ON -- второе соединение
+    rd.passenger_id = pas.passenger_id
+
+Чтобы выполнить соединение с третьей таблицей, мы добавили в запрос еще одну секцию INNER JOIN ... ON .... Добавляя секции, мы можем соединить произвольное число таблиц.
+
+--- Подзапросы ---
+
+Подзапросы — это запросы внутри запросов. Они позволяют использовать результат одного запроса внутри другого запроса.
+
+SELECT emp.name AS employee
+FROM employees AS emp
+WHERE emp.department_id = (
+    SELECT dep.department_id
+    FROM departments AS dep
+    WHERE dep.name = 'Development Department'
+)
+
+Запрос, который находится внутри другого запроса, называется подзапросом или вложенным запросом. 
+Подзапросы можно использовать почти в любом месте основного запроса, где можно использовать обычные значения. Нужно только окружить подзапрос круглыми скобками.
+
+-- Подзапросы, которые возвращают набор значений --
+
+Подзапросом можно заменить не только простое значение, но и набор значений. 
+
+SELECT emp.name AS employee
+FROM employees AS emp
+WHERE emp.department_id IN (
+    SELECT dep.department_id
+    FROM departments AS dep
+    WHERE dep.city = 'Vladivostok'
+);
+
+Подзапрос здесь возвращает список идентификаторов отделов, расположенных в определенном городе.
+
+Даже если подзапрос возвращает одну или ноль строк, с ним все равно можно работать как с набором значений. Например, пользоваться операторами IN, NOT IN, EXISTS и NOT EXISTS.
+
+-- Коррелированные подзапросы --
+
+Если подзапрос обращается к полям основного запроса, то его называют коррелированным. 
+
+SELECT
+    main_query_department.name AS department_title,
+    (
+        SELECT COUNT(*)
+        FROM employees AS subquery_employee
+        WHERE
+            subquery_employee.department_id
+            = main_query_department.department_id
+    ) AS employees_count
+FROM departments AS main_query_department
+
+Коррелированный подзапрос может возвращать как простое значение, так и набор значений.
+Такие подзапросы запускаются заново для каждой строки основного запроса, и общее время выполнения может быть очень большим.
+
+--- Подзапросы и соединения ---
+
+Задачи, которые мы решали с помощью соединений, иногда можно решить и с помощью подзапросов.
+
+-- Сравниваем соединения и некоррелированные подзапросы --
+
+Иногда мы можем заменить соединение на некоррелированный подзапрос. Одной из таких задач является фильтрация на основе признака, который хранится в связанной таблице. 
+
+Решение с помощью соединения:
+
+SELECT bk.title
+FROM books AS bk
+INNER JOIN authors AS au
+    ON
+        bk.book_author_id = au.author_id
+WHERE au.author_name = 'А.С. Пушкин';
+
+Решение с помощью подзапроса:
+
+SELECT bk.title
+FROM books AS bk
+WHERE bk.book_author_id = (
+    SELECT au.author_id
+    FROM authors AS au
+    WHERE au.author_name = 'А.С. Пушкин'
+);
+
+Так решение через подзапрос лучше, потому что оно экономичнее. Но и решение через соединение тоже достаточно хорошее. На практике разница между ними может быть минимальной.
+
+-- Сравниваем соединения и коррелированные подзапросы --
+
+Решение с помощью соединения:
+
+SELECT
+    bk.title,
+    au.author_name
+FROM books AS bk
+INNER JOIN authors AS au ON
+    bk.book_author_id = au.author_id;
+
+Решение с помощью подзапроса:
+
+SELECT
+    bk.title,
+    (
+        SELECT au.author_name
+        FROM authors AS au
+        WHERE au.author_id = bk.book_author_id
+    ) AS author_name
+FROM books AS bk
+
+Если строк много, то такой запрос будет работать сильно медленнее запроса с соединением. Поэтому на больших таблицах лучше использовать соединения вместо коррелированных подзапросов.
 
 
 
